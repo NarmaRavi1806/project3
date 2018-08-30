@@ -1,0 +1,149 @@
+package com.cg.capstore.repo;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.cg.capstore.bean.MerchantBean;
+import com.cg.capstore.bean.OrderBean;
+
+public interface MerchantPageRepo extends JpaRepository<MerchantBean, String>{
+	
+	@Query("SELECT m FROM MerchantBean m WHERE m.order=:order")
+	List<OrderBean> viewOrderList(@Param(value="order") String id);
+
+}
+
+
+package com.cg.capstore.service;
+
+import com.cg.capstore.bean.MerchantBean;
+import com.cg.capstore.bean.ProductBean;
+
+public interface IMerchantPageService {
+	
+	MerchantBean viewMerchantPageById(MerchantBean merchant);
+	ProductBean addProductFunctionalityByMerchant(ProductBean product);
+	ProductBean editProductFunctionalityByMerchant(ProductBean product);
+	String deleteProductFunctionalityByMerchant(String productId);
+	MerchantBean viewListOfOrders(String orderId);
+
+}
+
+
+package com.cg.capstore.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.cg.capstore.bean.MerchantBean;
+import com.cg.capstore.bean.ProductBean;
+import com.cg.capstore.repo.MerchantPageRepo;
+import com.cg.capstore.repo.ProductRepo;
+
+public class MerchantPageServiceImpl implements IMerchantPageService{
+	
+	@Autowired
+	private MerchantPageRepo merchantPage;
+	
+	private ProductRepo productRepo;
+
+	@Override
+	public MerchantBean viewMerchantPageById(MerchantBean merchant) {
+		merchantPage.findById(merchant.getEmailId());
+		return merchant;
+	}
+
+	@Override
+	public ProductBean addProductFunctionalityByMerchant(ProductBean product) {
+		
+		return productRepo.save(product);
+	}
+
+	@Override
+	public ProductBean editProductFunctionalityByMerchant(ProductBean product) {
+		ProductBean product1=new ProductBean();
+		product1.setProductId(product.getProductId());
+		product1.setProductName(product.getProductName());
+		product1.setPrice(product.getPrice());
+		product1.setCategory(product.getCategory());
+		product1.setQuantity(product.getQuantity());
+		product1.setDiscount(product.getDiscount());
+		product1.setFeedbackProduct(product.getFeedbackProduct());
+		product1.setImageId(product.getImageId());
+		//product1.setMerchant(product.getMerchant());
+		product1.setPromoCode(product.getPromoCode());
+		return product1;
+	}
+
+	@Override
+	public String deleteProductFunctionalityByMerchant(String productId) {
+		ProductBean product=new ProductBean();
+		product.setProductId(productId);
+		productRepo.deleteById(product.getProductId());
+		return "Product Deleted";
+	}
+
+	@Override
+	public MerchantBean viewListOfOrders(String orderId) {
+		ProductBean product=new ProductBean();
+		
+		return null;
+	}
+
+}
+
+
+
+
+Exception class
+
+MerchantIdNotFound
+DiscountDateExceed
+PromoCodeDateExceed
+InvalidOrder
+promoCodeInvalid
+CouponCodeInvalid
+OrderDetailsNotFound
+InvalidStatus
+MerchantNotFound
+InvaliOrderId
+InvalidProductId
+
+
+@Repository
+public interface PlacingOrderRepo extends JpaRepository<OrderBean, String> {
+
+}
+
+
+public interface IReturnGoodsService {
+	OrderBean placingOrderOfProduct(String id);
+	OrderBean CheckProductAvailability(String id); 
+
+}
+
+
+
+@Autowired
+	PlacingOrderRepo placingOrderRepo;
+	@Override
+	public OrderBean returnProduct(String order) {
+		
+	 OrderBean orderBean= returnGoodsRepo.getOne(order);
+	 if(orderBean.getOrderStatus().equalsIgnoreCase("Ordered")) {
+		 //orderBean.setOrderStatus("Returned");
+		 
+		 List<ProductBean> returningProcess = orderBean.getProduct();
+		 
+		 for (ProductBean productBean : returningProcess) {
+			
+			 int quantity = productBean.getQuantity() - 1;
+			 productBean.setQuantity(quantity);
+			 
+		}
+	 }
+	 return returnGoodsRepo.save(orderBean);
+		
+	}

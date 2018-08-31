@@ -119,7 +119,7 @@ public interface PlacingOrderRepo extends JpaRepository<OrderBean, String> {
 
 
 public interface IReturnGoodsService {
-	OrderBean placingOrderOfProduct(String id);
+	OrderBean placingOrderOfProduct(OrderBean orderBean);
 	OrderBean CheckProductAvailability(String id); 
 
 }
@@ -129,21 +129,21 @@ public interface IReturnGoodsService {
 @Autowired
 	PlacingOrderRepo placingOrderRepo;
 	@Override
-	public OrderBean returnProduct(String order) {
+	public OrderBean CheckProductAvailability(String id) {
 		
-	 OrderBean orderBean= returnGoodsRepo.getOne(order);
+	 OrderBean orderBean= placingOrderRepo.getOne(order);
 	 if(orderBean.getOrderStatus().equalsIgnoreCase("Ordered")) {
 		 //orderBean.setOrderStatus("Returned");
 		 
-		 List<ProductBean> returningProcess = orderBean.getProduct();
+		 List<ProductBean> placingOrder = orderBean.getProduct();
 		 
-		 for (ProductBean productBean : returningProcess) {
+		 for (ProductBean productBean : placingOrder) {
 			
 			 int quantity = productBean.getQuantity() - 1;
 			 productBean.setQuantity(quantity);
 			 
 		}
 	 }
-	 return returnGoodsRepo.save(orderBean);
+	 return placingOrderRepo.save(orderBean);
 		
 	}
